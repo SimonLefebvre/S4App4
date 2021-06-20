@@ -63,6 +63,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "accel.h"
 #include "lcd.h"
 #include "app_commands.h"
+#include "rgbled.h"
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Global Data Definitions
@@ -104,7 +106,8 @@ MAIN_DATA mainData;
 
 /* Application's LED Task Function */
 static unsigned long int counter=0;
-static void LedTask(void) {
+static void LedTask(void) 
+{
     if(counter++ == 20000){
         LED_ToggleValue(1);
         counter = 0;
@@ -152,7 +155,7 @@ void MAIN_Initialize ( void )
     LCD_Init();
     ACL_Init();
     SSD_Init();
-
+    RGBLED_Init();
 }
 
 
@@ -198,6 +201,7 @@ void MAIN_Tasks ( void )
             ManageSwitches();
         	JB1Toggle();
             LED0Toggle();
+            
             break;
         }
 

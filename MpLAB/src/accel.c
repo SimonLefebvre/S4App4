@@ -37,7 +37,7 @@
 #include "lcd.h"
 #include "ssd.h"
 #include "app_commands.h"
-
+#include "rgbled.h"
 /* ************************************************************************** */
 
 
@@ -69,11 +69,11 @@ void ACL_Init()
     ACL_GetRegister(ACL_CTRL_REG2);
     ACL_SetRegister(ACL_CTRL_REG2, 0x40);        // Reset
     while(ACL_GetRegister(ACL_CTRL_REG2)&0x40);
-    ACL_SetRegister(ACL_CTRL_REG4, 1);        // Output data rate at 800Hz, no auto wake, no auto scale adjust, no fast read mode
-    ACL_SetRegister(ACL_CTRL_REG5, 0);        // Output data rate at 800Hz, no auto wake, no auto scale adjust, no fast read mode
+    ACL_SetRegister(ACL_CTRL_REG4, 1);           // Data ready interrupt enable
+    ACL_SetRegister(ACL_CTRL_REG5, 0);           // intterupt 2
     ACL_GetRegister(ACL_INT_SOURCE);
-    ACL_SetRegister(ACL_CTRL_REG1, 0x38);        // Output data rate at 800Hz, no auto wake, no auto scale adjust, no fast read mode
-    ACL_SetRegister(ACL_CTRL_REG1, 0x39);        // Output data rate at 800Hz, no auto wake, no auto scale adjust, no fast read mode
+    ACL_SetRegister(ACL_CTRL_REG1, 0x08);        // Output data rate at 400Hz, no auto wake, no auto scale adjust, no fast read mode
+    ACL_SetRegister(ACL_CTRL_REG1, 0x09);        // Active set
 }
 
 /* ------------------------------------------------------------ */
@@ -104,22 +104,26 @@ void accel_tasks()
 {
     if(accel_data_ready)
     {
-        //ACL_ReadRawValues(accel_buffer);
-
-    if(SWITCH1StateGet())
-    {
-    	signed short accelX, accelY, accelZ; 
-    	accelX = ((signed int) accel_buffer[0]<<24)>>20  | accel_buffer[1] >> 4; //VR
-    	accelY = ((signed int) accel_buffer[2]<<24)>>20  | accel_buffer[3] >> 4; //VR
-    	accelZ = ((signed int) accel_buffer[4]<<24)>>20  | accel_buffer[5] >> 4; //VR
-        SYS_CONSOLE_PRINT("%d,%d,%d\r\n", accelX, accelY, accelZ);
-    }     
+        if(SWITCH1StateGet())
+        {
+            signed short accelX, accelY, accelZ; 
+            accelX = ((signed int) accel_buffer[0]<<24)>>20  | accel_buffer[1] >> 4; //VR
+            accelY = ((signed int) accel_buffer[2]<<24)>>20  | accel_buffer[3] >> 4; //VR
+            accelZ = ((signed int) accel_buffer[4]<<24)>>20  | accel_buffer[5] >> 4; //VR
+            SYS_CONSOLE_PRINT("%d,%d,%d\r\n", accelX, accelY, accelZ);
+        }     
         char outbuf[80];
         sprintf(outbuf, "X: %02x%01x", accel_buffer[0], accel_buffer[1] >> 4);
         LCD_WriteStringAtPos(outbuf, 0, 0);
         sprintf(outbuf, "Y: %02x%01x Z: %02x%01x", accel_buffer[2], accel_buffer[3] >> 4, accel_buffer[4], accel_buffer[5] >> 4);
         LCD_WriteStringAtPos(outbuf, 1, 0);
         SSD_WriteDigitsGrouped(count++, 0x1);
+        unsigned char R, G, B;
+        R =  abs(accel_buffer[0]<<4 | accel_buffer[1] >> 4);
+        G =  abs(accel_buffer[2]<<4 | accel_buffer[3] >> 4);
+        B =  abs(accel_buffer[4]<<4 | accel_buffer[5] >> 4);
+        RGBLED_SetValue(R,G,B);
+        
         accel_data_ready = false;
     }
 }
