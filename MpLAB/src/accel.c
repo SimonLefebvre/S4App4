@@ -73,6 +73,9 @@ void ACL_Init()
     ACL_SetRegister(ACL_CTRL_REG5, 0);           // intterupt 2
     ACL_GetRegister(ACL_INT_SOURCE);
     ACL_SetRegister(ACL_CTRL_REG1, 0x08);        // Output data rate at 400Hz, no auto wake, no auto scale adjust, no fast read mode
+    ACL_SetRegister(ACL_XYZDATACFG, 0x10);  //high pass and +-2G
+    
+    
     ACL_SetRegister(ACL_CTRL_REG1, 0x09);        // Active set
 }
 
@@ -98,10 +101,25 @@ void ACL_ConfigurePins()
     tris_ACL_INT2 = 1;
 }
 
-uint16_t count= 0;
+uint32_t count= 0;
+
+int16_t moyenne(int16_t* buffer, uint32_t size)
+{
+    uint32_t moyenne = 0;
+    int i =0;
+    for(;i<size;i++)
+    {
+        moyenne += buffer[i];
+    }
+    moyenne = moyenne / size;
+    return (int16_t)moyenne;
+}
 
 void accel_tasks()
 {
+    static int16_t X[16] = {0};
+    static int16_t Y[16] = {0};
+    static int16_t Z[16] = {0};
     if(accel_data_ready)
     {
         if(SWITCH1StateGet())
@@ -113,20 +131,41 @@ void accel_tasks()
             SYS_CONSOLE_PRINT("%d,%d,%d\r\n", accelX, accelY, accelZ);
         }     
         char outbuf[80];
-        sprintf(outbuf, "X: %02x%01x", accel_buffer[0], accel_buffer[1] >> 4);
-        LCD_WriteStringAtPos(outbuf, 0, 0);
-        sprintf(outbuf, "Y: %02x%01x Z: %02x%01x", accel_buffer[2], accel_buffer[3] >> 4, accel_buffer[4], accel_buffer[5] >> 4);
-        LCD_WriteStringAtPos(outbuf, 1, 0);
-        SSD_WriteDigitsGrouped(count++, 0x1);
-        unsigned char R, G, B;
-        R =  abs(accel_buffer[0]<<4 | accel_buffer[1] >> 4);
-        G =  abs(accel_buffer[2]<<4 | accel_buffer[3] >> 4);
-        B =  abs(accel_buffer[4]<<4 | accel_buffer[5] >> 4);
-        RGBLED_SetValue(R,G,B);
         
+        /*sprintf(outbuf, "X: %02x%01x", accel_buffer[0], accel_buffer[1] >> 4);
+            LCD_WriteStringAtPos(outbuf, 0, 0);
+            sprintf(outbuf, "Y: %02x%01x Z: %02x%01x", accel_buffer[2], accel_buffer[3] >> 4, accel_buffer[4], accel_buffer[5] >> 4);
+            LCD_WriteStringAtPos(outbuf, 1, 0);*/
+        SSD_WriteDigitsGrouped(count++, 0x1);
+        if(accel_buffer[0]&0x80)X[count%16] = 0xF000 | (accel_buffer[0]<<4 | accel_buffer[1] >> 4);
+        else X[count%16] = (accel_buffer[0]<<4 | accel_buffer[1] >> 4);
+        if(accel_buffer[2]&0x80)Y[count%16] = 0xF000 | (accel_buffer[2]<<4 | accel_buffer[3] >> 4);
+        else Y[count%16] = (accel_buffer[2]<<4 | accel_buffer[3] >> 4);
+        if(accel_buffer[4]&0x80)Z[count%16] = 0xF000 | (accel_buffer[4]<<4 | accel_buffer[5] >> 4);
+        else Z[count%16] = (accel_buffer[4]<<4 | accel_buffer[5] >> 4);
+        
+        if(count%16 == 15)
+        {
+            int16_t R, G, B ;
+            R =  moyenne(X,16);
+            G =  moyenne(Y,16);
+            B =  moyenne(Z,16);
+            
+            RGBLED_SetValue((abs(R)>>7)&0xFF,(abs(G)>>7)&0xFF,(abs(B)>>7)&0xFF); 
+            sprintf(outbuf, "X: %04d", R);
+            LCD_WriteStringAtPos(outbuf, 0, 0);
+            sprintf(outbuf, "Y: %04d Z: %04d", G, B);
+            LCD_WriteStringAtPos(outbuf, 1, 0);
+            
+            sprintf(outbuf, "\rX:%04d Y:%04d, Z:%04d",R,G,B);
+            SYS_CONSOLE_MESSAGE(outbuf);
+        }
         accel_data_ready = false;
     }
 }
+
+
+
 
 /* ------------------------------------------------------------ */
 /***	ACL_SetRegister
