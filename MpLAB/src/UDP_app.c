@@ -128,8 +128,6 @@ void UDP_Initialize ( void )
     UDP_Commands_Init();
 }
 
-bool socketInitialized = false;
-
 void _UDP_ClientTasks()
 {
     switch(appData.clientState)
@@ -146,11 +144,9 @@ void _UDP_ClientTasks()
                     IPV4_ADDR addr;
                     TCPIP_Helper_StringToIPAddress(UDP_Hostname_Buffer, &addr);
                     uint16_t port = atoi(UDP_Port_Buffer);
-                    if(!socketInitialized)
-                    {
-                        appData.clientSocket = TCPIP_UDP_ClientOpen(IP_ADDRESS_TYPE_IPV4,port, (IP_MULTI_ADDRESS*) & addr);
-                        socketInitialized = true;
-                    }
+                   
+                    appData.clientSocket = TCPIP_UDP_ClientOpen(IP_ADDRESS_TYPE_IPV4,port, (IP_MULTI_ADDRESS*) & addr);
+                    
                     if (appData.clientSocket == INVALID_SOCKET) {
                         SYS_CONSOLE_MESSAGE("\r\nClient: Could not start connection\r\n");
                         appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
@@ -253,7 +249,7 @@ void _UDP_ClientTasks()
                 UDP_Receive_Buffer[UDP_bytes_received] = '\0';    //append a null to display strings properly
                 SYS_CONSOLE_PRINT("\r\nClient: Client received %s\r\n", UDP_Receive_Buffer);
                 appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
-                //TCPIP_UDP_Close(appData.clientSocket); // XD: We want to keep socket opened
+                TCPIP_UDP_Close(appData.clientSocket); // XD: We want to keep socket opened
                 SYS_CONSOLE_MESSAGE("\r\nClient: Closing connection\r\n");
             }
         }
@@ -452,7 +448,7 @@ void UDP_Tasks ( void )
             }
 			// all interfaces ready. Could start transactions!!!
 			appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
-			appData.serverState = UDP_TCPIP_OPENING_SERVER;
+			//appData.serverState = UDP_TCPIP_OPENING_SERVER;
 			SYS_CONSOLE_MESSAGE("Waiting for command, type: sendudppacket\r\n");
             break;
 
