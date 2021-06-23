@@ -60,22 +60,20 @@ bool UDP_Commands_Init()
         SYS_ERROR(SYS_ERROR_ERROR, "Failed to create UDP Commands\r\n");
         return false;
     }
-    strcpy(UDP_Hostname_Buffer, "192.168.13.2");
+    //strcpy(UDP_Hostname_Buffer, "192.168.13.2");//to send FPGA
+    strcpy(UDP_Hostname_Buffer, "192.168.13.4");//to send to local server
     strcpy(UDP_Port_Buffer, "8080");
     memset(UDP_Receive_Buffer, 0, sizeof (UDP_Receive_Buffer));
     memset(UDP_Send_Buffer, 0, sizeof (UDP_Send_Buffer));
     memset(UDP_Server_Receive_Buffer, 0, sizeof (UDP_Server_Receive_Buffer));
     UDP_Send_Packet = false;
-    strcpy(UDP_Send_Buffer, "123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960");
-    strcpy(UDP_Send_Buffer+222, "123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960");
-    strcpy(UDP_Send_Buffer+444, "123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960");
    return true;
 }
 
 
 char UDP_Hostname_Buffer[MAX_URL_SIZE];
 char UDP_Port_Buffer[6];
-char UDP_Send_Buffer[MAX_PACKET_SIZE+1];
+int32_t UDP_Send_Buffer[MAX_PACKET_SIZE+1];
 char UDP_Receive_Buffer[MAX_PACKET_SIZE+1];
 uint8_t UDP_Server_Receive_Buffer[MAX_PACKET_SIZE+1];
 bool UDP_Send_Packet = false;
@@ -112,7 +110,7 @@ int _UDP_Commands_SetOptions(SYS_CMD_DEVICE_NODE* pCmdIO, int argc, char** argv)
 
     strcpy(UDP_Hostname_Buffer, argv[1]);
     strcpy(UDP_Port_Buffer, argv[2]);
-    strcpy(UDP_Send_Buffer, argv[3]);
+    //strcpy(UDP_Send_Buffer, argv[3]);//SL: not used and conflicted on new changes
     return true;
 }
 
@@ -134,7 +132,7 @@ int _UDP_Commands_GetOptions(SYS_CMD_DEVICE_NODE* pCmdIO, int argc, char** argv)
      (*pCmdIO->pCmdApi->msg)(cmdIoParam, bufferArea[0]);
      sprintf(bufferArea[1], "\tport: '%s'\r\n", UDP_Port_Buffer);
      (*pCmdIO->pCmdApi->msg)(cmdIoParam, bufferArea[1]);
-     sprintf(bufferArea[2], "\tmessage: '%s'\r\n", UDP_Send_Buffer);
+     //sprintf(bufferArea[2], "\tmessage: '%s'\r\n", UDP_Send_Buffer);//SL: not used and conflicts new type
      (*pCmdIO->pCmdApi->msg)(cmdIoParam, bufferArea[2]);
 
     return false;

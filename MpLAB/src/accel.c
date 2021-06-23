@@ -115,6 +115,38 @@ int16_t moyenne(int16_t* buffer, uint32_t size)
     return (int16_t)moyenne;
 }
 
+
+uint32_t indexSequence = 0;
+
+void env_aclData(int16_t* bufferx, int16_t* buffery, int16_t* bufferz, uint32_t size)
+{
+    // Index de séquence
+    UDP_Send_Buffer[0] = indexSequence;
+
+    int i = 0;
+    for(;i<size;i++)
+    {
+        UDP_Send_Buffer[i+1] = bufferx[i];
+        UDP_Send_Buffer[i+41] = buffery[i];
+        UDP_Send_Buffer[i+81] = bufferz[i];
+    }
+    
+    UDP_bytes_to_send = (size*4*3) +4;
+
+    
+    /*
+    int j = 0;
+    for(;j<5;j++)
+    {
+        SYS_CONSOLE_PRINT("Buffer x: 0x%x\n\r", bufferx[j]);
+        SYS_CONSOLE_PRINT("Buffer UDPsend: 0x%x\n\r", UDP_Send_Buffer[j+1]);
+    }*/ //For test
+    
+
+    UDP_Send_Packet = true;
+    indexSequence++;
+}
+
 void accel_tasks()
 {
     static int16_t X[40] = {0};
@@ -147,6 +179,8 @@ void accel_tasks()
         if(count%40 == 39)
         {
             int16_t R, G, B ;
+            
+            env_aclData(X, Y, Z, 40);
             R =  moyenne(X,40);
             G =  moyenne(Y,40);
             B =  moyenne(Z,40);

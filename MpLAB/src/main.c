@@ -121,9 +121,9 @@ void ManageSwitches()
     bool sw0_new = SWITCH0StateGet();
     if((sw0_new != sw0_old) && sw0_new)
     {
-        strcpy(UDP_Send_Buffer, "Bonjour S4\n\r");
-        UDP_bytes_to_send = strlen(UDP_Send_Buffer);
-        UDP_Send_Packet = true;       
+        //strcpy(UDP_Send_Buffer, "Bonjour S4\n\r");
+        //UDP_bytes_to_send = strlen(UDP_Send_Buffer);
+        //UDP_Send_Packet = true;       
     }
 
     sw0_old = sw0_new; 

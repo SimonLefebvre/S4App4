@@ -128,6 +128,8 @@ void UDP_Initialize ( void )
     UDP_Commands_Init();
 }
 
+
+bool socketinit = false;
 void _UDP_ClientTasks()
 {
     switch(appData.clientState)
@@ -137,6 +139,7 @@ void _UDP_ClientTasks()
             SYS_CMD_READY_TO_READ();
             if (UDP_Send_Packet)
             {
+                
                 TCPIP_DNS_RESULT result;
                 UDP_Send_Packet = false;
                 result = TCPIP_DNS_RES_NAME_IS_IPADDRESS; //TCPIP_DNS_Resolve(UDP_Hostname_Buffer, TCPIP_DNS_TYPE_A);
@@ -145,13 +148,16 @@ void _UDP_ClientTasks()
                     TCPIP_Helper_StringToIPAddress(UDP_Hostname_Buffer, &addr);
                     uint16_t port = atoi(UDP_Port_Buffer);
                    
-                    appData.clientSocket = TCPIP_UDP_ClientOpen(IP_ADDRESS_TYPE_IPV4,port, (IP_MULTI_ADDRESS*) & addr);
-                    
+                    if(socketinit == false){
+                        appData.clientSocket = TCPIP_UDP_ClientOpen(IP_ADDRESS_TYPE_IPV4,port, (IP_MULTI_ADDRESS*) & addr);
+                        SYS_CONSOLE_MESSAGE("\r\nClient: OPENING A SOCKET\r\n");
+                    }
                     if (appData.clientSocket == INVALID_SOCKET) {
                         SYS_CONSOLE_MESSAGE("\r\nClient: Could not start connection\r\n");
                         appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
                     }
-                    SYS_CONSOLE_MESSAGE("\r\nClient: Starting connection\r\n");
+                    else socketinit = true;
+                    
                     appData.clientState = UDP_TCPIP_WAIT_FOR_CONNECTION;
                     break;
                 }
@@ -199,23 +205,62 @@ void _UDP_ClientTasks()
 
         case UDP_TCPIP_WAIT_FOR_CONNECTION:
         {
-            if (!TCPIP_UDP_IsConnected(appData.clientSocket))
+            if(UDP_Send_Packet)
             {
-                SYS_CONSOLE_MESSAGE("Client: Not connected\r\n");
-                break;
-            }
-            if(TCPIP_UDP_PutIsReady(appData.clientSocket) == 0)
-            {
-                SYS_CONSOLE_MESSAGE("Client: No Space in Stack\r\n");
-                break;
-            }
-            SYS_CONSOLE_PRINT("Avail %d\r\n", TCPIP_UDP_PutIsReady(appData.clientSocket));
-            UDP_bytes_to_send = strlen(UDP_Send_Buffer);
-            SYS_CONSOLE_PRINT("Client: Sending %s", UDP_Send_Buffer);
-            TCPIP_UDP_ArrayPut(appData.clientSocket, (uint8_t*)UDP_Send_Buffer, UDP_bytes_to_send);
-            TCPIP_UDP_Flush(appData.clientSocket);
-            appData.clientState = UDP_TCPIP_WAIT_FOR_RESPONSE;
-            appData.mTimeOut = SYS_TMR_SystemCountGet() + SYS_TMR_SystemCountFrequencyGet();
+                if (!TCPIP_UDP_IsConnected(appData.clientSocket))
+                {
+                    SYS_CONSOLE_MESSAGE("Client: Not connected\r\n");
+                    while(1);
+                    //appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
+                    //TCPIP_UDP_Close(appData.clientSocket); 
+                    break;
+                }
+                if(TCPIP_UDP_PutIsReady(appData.clientSocket) == 0)
+                {
+                    SYS_CONSOLE_MESSAGE("Client: No Space in Stack\r\n");
+                    //appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
+                    //TCPIP_UDP_Close(appData.clientSocket); 
+                    break;
+                }
+            
+                uint32_t Avail = TCPIP_UDP_PutIsReady(appData.clientSocket);
+                
+
+                if(Avail >= UDP_bytes_to_send)
+                {
+                    
+                    TCPIP_UDP_ArrayPut(appData.clientSocket, (uint8_t*)UDP_Send_Buffer, UDP_bytes_to_send);
+                    TCPIP_UDP_Flush(appData.clientSocket);
+                    appData.clientState = UDP_TCPIP_WAIT_FOR_RESPONSE;
+                    appData.mTimeOut = SYS_TMR_SystemCountGet() + SYS_TMR_SystemCountFrequencyGet();
+                    
+                    if(SWITCH0StateGet())
+                    {
+                        SYS_CONSOLE_PRINT("Client Sends %d data :\r\n", UDP_bytes_to_send);
+                        SYS_CONSOLE_PRINT("Avail %d\r\n", Avail);
+                        int i =0;
+                        SYS_CONSOLE_PRINT("index: %d\n\r",UDP_Send_Buffer[i]);
+                        i++;
+                        SYS_CONSOLE_PRINT("X: ",UDP_Send_Buffer[i]);
+                        for(;i<41;i++)
+                        {
+                            SYS_CONSOLE_PRINT("%d ",UDP_Send_Buffer[i]);
+                        }
+                        SYS_CONSOLE_PRINT("\n\rY: ",UDP_Send_Buffer[i]);
+                        for(;i<81;i++)
+                        {
+                            SYS_CONSOLE_PRINT("%d ",UDP_Send_Buffer[i]);
+                        }
+                        SYS_CONSOLE_PRINT("\n\rZ: ",UDP_Send_Buffer[i]);
+                        for(;i<121;i++)
+                        {
+                            SYS_CONSOLE_PRINT("%d ",UDP_Send_Buffer[i]);
+                        }
+                    }
+                }
+                else SYS_CONSOLE_PRINT("Erreur, not enough buffer space\r\n");
+           }
+            
             //SYS_CONSOLE_PRINT("Client: Timeout %lu\n\r", appData.mTimeOut);
         }
         break;
@@ -224,10 +269,12 @@ void _UDP_ClientTasks()
         {
             //char buffer[180];
             //memset(UDP_Receive_Buffer, 0, sizeof(UDP_Receive_Buffer));
+            
             if (SYS_TMR_SystemCountGet() > appData.mTimeOut)
             {
                 SYS_CONSOLE_MESSAGE("\r\nClient: Timeout waiting for response\r\n");
                 TCPIP_UDP_Close(appData.clientSocket);
+                socketinit = false;
                 appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
                 break;
             }
@@ -249,8 +296,11 @@ void _UDP_ClientTasks()
                 UDP_Receive_Buffer[UDP_bytes_received] = '\0';    //append a null to display strings properly
                 SYS_CONSOLE_PRINT("\r\nClient: Client received %s\r\n", UDP_Receive_Buffer);
                 appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
-                TCPIP_UDP_Close(appData.clientSocket); // XD: We want to keep socket opened
-                SYS_CONSOLE_MESSAGE("\r\nClient: Closing connection\r\n");
+                //TCPIP_UDP_Close(appData.clientSocket); // XD: We want to keep socket opened
+                //SYS_CONSOLE_MESSAGE("\r\nClient: Closing connection\r\n");
+            }
+            if(SWITCH7StateGet()){
+                appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
             }
         }
         break;
@@ -355,6 +405,7 @@ void _UDP_ServerTasks( void )
         {
             			// Close the socket connection.
             TCPIP_UDP_Close(appData.serverSocket);
+            socketinit = false;
             SYS_CONSOLE_PRINT("Server: \tClosing connection\r\n\r\n\r\n");
             appData.serverState = UDP_TCPIP_OPENING_SERVER;
 
@@ -380,7 +431,7 @@ void UDP_Tasks ( void )
     IPV4_ADDR           ipAddr;
     int                 i, nNets;
     TCPIP_NET_HANDLE    netH;
-
+    
     /* Check the application's current state. */
     switch(appData.clientState) {
         case UDP_TCPIP_WAIT_INIT:
@@ -457,8 +508,9 @@ void UDP_Tasks ( void )
             break;
 
         default:
+            
             _UDP_ClientTasks();
-            //_UDP_ServerTasks(); // XD : PIC32 in client mode
+            _UDP_ServerTasks(); // XD : PIC32 in client mode
             break;
     }
 }
