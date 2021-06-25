@@ -221,7 +221,21 @@ int main(void) {
     SYS_INT_Enable();
     SSD_WriteDigitsGrouped(0xFA9B,0x1);
     
-    while (1) {
+    SYS_Tasks();
+    
+    SYS_CONSOLE_PRINT("\r\n*******************************************\r\n");
+    SYS_CONSOLE_PRINT("S4 App4\n\r");
+    SYS_CONSOLE_PRINT("Simon Lefebvre lefs3303\n\r");
+    SYS_CONSOLE_PRINT("Jeremy Chenard\n\r");
+    SYS_CONSOLE_PRINT("Xavier Dufour\n\r");
+    SYS_CONSOLE_PRINT("SW0 Print data send\n\r");
+    SYS_CONSOLE_PRINT("SW1 Print raw data from accel\n\r");
+    SYS_CONSOLE_PRINT("SW2 Print X,Y,Z\n\r");
+    SYS_CONSOLE_PRINT("SW7 Bypass reception wait");
+    SYS_CONSOLE_PRINT("\r\n*******************************************\r\n");
+    
+    while (1) 
+    {
         SYS_Tasks();
         MAIN_Tasks();
     };

@@ -510,7 +510,7 @@ void UDP_Tasks ( void )
         default:
             
             _UDP_ClientTasks();
-            _UDP_ServerTasks(); // XD : PIC32 in client mode
+            //_UDP_ServerTasks(); // XD : PIC32 in client mode
             break;
     }
 }

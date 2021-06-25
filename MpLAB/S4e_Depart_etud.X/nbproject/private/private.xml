@@ -3,11 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/system_config/default/system_init.c</file>
+            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/system_config/default/framework/tcpip/tcpip.h</file>
+            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/app_commands.c</file>
             <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/accel.c</file>
+            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/system_config/default/framework/system/console/src/sys_console.c</file>
             <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/UDP_app.c</file>
-            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/ssd.c</file>
-            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/UDP_app.h</file>
+            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/system_config/default/system_config.h</file>
             <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/main.c</file>
+            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/system_config/default/framework/system/command/src/sys_command.c</file>
+            <file>file:/C:/Users/mimon/OneDrive/Documents/GitHub/APP4/S4App4/MpLAB/src/system_config/default/system_tasks.c</file>
         </group>
     </open-files>
 </project-private>
