@@ -120,7 +120,7 @@ uint32_t indexSequence = 0;
 
 void env_aclData(int16_t* bufferx, int16_t* buffery, int16_t* bufferz, uint32_t size)
 {
-    // Index de séquence
+    // Index de sï¿½quence
     UDP_Send_Buffer[0] = indexSequence;
 
     int i = 0;
@@ -176,32 +176,34 @@ void accel_tasks()
         if(accel_buffer[4]&0x80)Z[count%40] = 0xF000 | (accel_buffer[4]<<4 | accel_buffer[5] >> 4);
         else Z[count%40] = (accel_buffer[4]<<4 | accel_buffer[5] >> 4);
         
+        uint32_t buffer[121];
+        memcpy(buffer,UDP_Receive_Buffer,sizeof(buffer));
+        RGBLED_SetValue((buffer[(count%40)+1]>>1)&0xFF,(buffer[(count%40)+41]>>1)&0xFF,(buffer[(count%40)+81]>>1)&0xFF);
+        
         if(count%40 == 39)
         {
             int16_t R, G, B ;
             
+            env_aclData(X, Y, Z, 40);
             
-            R =  moyenne(X,40);
-            G =  moyenne(Y,40);
-            B =  moyenne(Z,40);
+            R =  moyenne(X,40);//self test
+            G =  moyenne(Y,40);//self test
+            B =  moyenne(Z,40);//self test
+            //RGBLED_SetValue((abs(R)>>1)&0xFF,(abs(G)>>1)&0xFF,(abs(B)>>1)&0xFF); 
             
-            RGBLED_SetValue((abs(R)>>1)&0xFF,(abs(G)>>1)&0xFF,(abs(B)>>1)&0xFF); 
-            sprintf(outbuf, "X: %04d", R);
-            //LCD_WriteStringAtPos(outbuf, 0, 0);
-            sprintf(outbuf, "Y: %04d Z: %04d", G, B);
-            //LCD_WriteStringAtPos(outbuf, 1, 0);
+            if(SWITCH3StateGet())
+            {
+                sprintf(outbuf, "X: %04d", R);
+                LCD_WriteStringAtPos(outbuf, 0, 0);
+                sprintf(outbuf, "Y: %04d Z: %04d", G, B);
+                LCD_WriteStringAtPos(outbuf, 1, 0);
+            }
             
             if(SWITCH2StateGet())
             {
                 sprintf(outbuf, "\rX:%04d Y:%04d, Z:%04d",R,G,B);
                 SYS_CONSOLE_MESSAGE(outbuf);
             }
-            
-            if(SWITCH4StateGet())
-            {
-                env_aclData(X, Y, Z, 40);
-            }
-            
         }
         accel_data_ready = false;
     }

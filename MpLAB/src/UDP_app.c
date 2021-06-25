@@ -287,13 +287,40 @@ void _UDP_ClientTasks()
             if (UDP_bytes_received)
             {
                 TCPIP_UDP_ArrayGet(appData.clientSocket, (uint8_t*)UDP_Receive_Buffer, sizeof(UDP_Receive_Buffer)-1);
-                if(UDP_bytes_received > sizeof(UDP_Receive_Buffer)-1){
+                if(UDP_bytes_received > sizeof(UDP_Receive_Buffer)-1)
+                {
                     SYS_CONSOLE_PRINT("\r\nClient: Bytes discarded %u\n\r", UDP_bytes_received - sizeof(UDP_Receive_Buffer)-1);
                     TCPIP_UDP_Discard(appData.clientSocket);
                     UDP_bytes_received = sizeof(UDP_Receive_Buffer)-1;
                 }
                 UDP_Receive_Buffer[UDP_bytes_received] = '\0';    //append a null to display strings properly
-                SYS_CONSOLE_PRINT("\r\nClient: Client received %s\r\n", UDP_Receive_Buffer);
+                
+                if(SWITCH0StateGet())
+                {
+                    uint32_t buffer[121];
+                    memcpy(buffer,UDP_Receive_Buffer,sizeof(buffer));    
+                    
+                    SYS_CONSOLE_PRINT("Client Revieves %d data :\r\n", UDP_bytes_received);
+                    int i =0;
+                    SYS_CONSOLE_PRINT("index: %d\n\r",buffer[i]);
+                    i++;
+                    SYS_CONSOLE_PRINT("X: ",buffer[i]);
+                    for(;i<41;i++)
+                    {
+                        SYS_CONSOLE_PRINT("%d ",buffer[i]);
+                    }
+                    SYS_CONSOLE_PRINT("\n\rY: ",buffer[i]);
+                    for(;i<81;i++)
+                    {
+                        SYS_CONSOLE_PRINT("%d ",buffer[i]);
+                    }
+                    SYS_CONSOLE_PRINT("\n\rZ: ",buffer[i]);
+                    for(;i<121;i++)
+                    {
+                        SYS_CONSOLE_PRINT("%d ",buffer[i]);
+                    }
+                }
+                
                 // Envoie au LCD
                 appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
                 //TCPIP_UDP_Close(appData.clientSocket); // XD: We want to keep socket opened

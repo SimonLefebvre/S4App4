@@ -230,7 +230,8 @@ int main(void) {
     SYS_CONSOLE_PRINT("Xavier Dufour\n\r");
     SYS_CONSOLE_PRINT("SW0 Print data send\n\r");
     SYS_CONSOLE_PRINT("SW1 Print raw data from accel\n\r");
-    SYS_CONSOLE_PRINT("SW2 Print X,Y,Z\n\r");
+    SYS_CONSOLE_PRINT("SW2 Print X,Y,Z simulated in PIC\n\r");
+    SYS_CONSOLE_PRINT("SW3 Print X,Y,Z simulated in PIC on LCD\n\r");
     SYS_CONSOLE_PRINT("SW7 Bypass reception wait");
     SYS_CONSOLE_PRINT("\r\n*******************************************\r\n");
     
