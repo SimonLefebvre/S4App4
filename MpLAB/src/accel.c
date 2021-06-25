@@ -180,21 +180,26 @@ void accel_tasks()
         {
             int16_t R, G, B ;
             
-            env_aclData(X, Y, Z, 40);
+            
             R =  moyenne(X,40);
             G =  moyenne(Y,40);
             B =  moyenne(Z,40);
             
             RGBLED_SetValue((abs(R)>>1)&0xFF,(abs(G)>>1)&0xFF,(abs(B)>>1)&0xFF); 
             sprintf(outbuf, "X: %04d", R);
-            LCD_WriteStringAtPos(outbuf, 0, 0);
+            //LCD_WriteStringAtPos(outbuf, 0, 0);
             sprintf(outbuf, "Y: %04d Z: %04d", G, B);
-            LCD_WriteStringAtPos(outbuf, 1, 0);
+            //LCD_WriteStringAtPos(outbuf, 1, 0);
             
             if(SWITCH2StateGet())
             {
                 sprintf(outbuf, "\rX:%04d Y:%04d, Z:%04d",R,G,B);
                 SYS_CONSOLE_MESSAGE(outbuf);
+            }
+            
+            if(SWITCH4StateGet())
+            {
+                env_aclData(X, Y, Z, 40);
             }
             
         }

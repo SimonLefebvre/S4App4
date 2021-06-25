@@ -152,7 +152,7 @@ void MAIN_Initialize ( void )
     mainData.handleUSART0 = DRV_HANDLE_INVALID;
 
     UDP_Initialize();
-    LCD_Init();
+    //LCD_Init();
     ACL_Init();
     SSD_Init();
     RGBLED_Init();

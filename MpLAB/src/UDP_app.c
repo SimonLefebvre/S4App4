@@ -210,7 +210,6 @@ void _UDP_ClientTasks()
                 if (!TCPIP_UDP_IsConnected(appData.clientSocket))
                 {
                     SYS_CONSOLE_MESSAGE("Client: Not connected\r\n");
-                    while(1);
                     //appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
                     //TCPIP_UDP_Close(appData.clientSocket); 
                     break;
@@ -295,6 +294,7 @@ void _UDP_ClientTasks()
                 }
                 UDP_Receive_Buffer[UDP_bytes_received] = '\0';    //append a null to display strings properly
                 SYS_CONSOLE_PRINT("\r\nClient: Client received %s\r\n", UDP_Receive_Buffer);
+                // Envoie au LCD
                 appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
                 //TCPIP_UDP_Close(appData.clientSocket); // XD: We want to keep socket opened
                 //SYS_CONSOLE_MESSAGE("\r\nClient: Closing connection\r\n");

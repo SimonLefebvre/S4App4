@@ -60,9 +60,9 @@ bool UDP_Commands_Init()
         SYS_ERROR(SYS_ERROR_ERROR, "Failed to create UDP Commands\r\n");
         return false;
     }
-    //strcpy(UDP_Hostname_Buffer, "192.168.13.2");//to send FPGA
+    strcpy(UDP_Hostname_Buffer, "192.168.13.2");//to send FPGA
     //strcpy(UDP_Hostname_Buffer, "192.168.13.4");//to send to local server
-    strcpy(UDP_Hostname_Buffer, "96.20.49.137");
+    //strcpy(UDP_Hostname_Buffer, "96.20.49.137");
     strcpy(UDP_Port_Buffer, "8080");
     memset(UDP_Receive_Buffer, 0, sizeof (UDP_Receive_Buffer));
     memset(UDP_Send_Buffer, 0, sizeof (UDP_Send_Buffer));
