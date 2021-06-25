@@ -176,20 +176,26 @@ void accel_tasks()
         if(accel_buffer[4]&0x80)Z[count%40] = 0xF000 | (accel_buffer[4]<<4 | accel_buffer[5] >> 4);
         else Z[count%40] = (accel_buffer[4]<<4 | accel_buffer[5] >> 4);
         
+        RGBLED_SetValue((((uint32_t)UDP_Receive_Buffer[(count%40)+1])>>1)&0xFF,(((uint32_t)UDP_Receive_Buffer[(count%40)+41])>>1)&0xFF,(((uint32_t)UDP_Receive_Buffer[(count%40)+81])>>1)&0xFF);
+        
         if(count%40 == 39)
         {
             int16_t R, G, B ;
             
             env_aclData(X, Y, Z, 40);
-            R =  moyenne(X,40);
-            G =  moyenne(Y,40);
-            B =  moyenne(Z,40);
             
-            RGBLED_SetValue((abs(R)>>1)&0xFF,(abs(G)>>1)&0xFF,(abs(B)>>1)&0xFF); 
-            sprintf(outbuf, "X: %04d", R);
-            LCD_WriteStringAtPos(outbuf, 0, 0);
-            sprintf(outbuf, "Y: %04d Z: %04d", G, B);
-            LCD_WriteStringAtPos(outbuf, 1, 0);
+            R =  moyenne(X,40);//self test
+            G =  moyenne(Y,40);//self test
+            B =  moyenne(Z,40);//self test
+            //RGBLED_SetValue((abs(R)>>1)&0xFF,(abs(G)>>1)&0xFF,(abs(B)>>1)&0xFF); 
+            
+            if(SWITCH3StateGet())
+            {
+                sprintf(outbuf, "X: %04d", R);
+                LCD_WriteStringAtPos(outbuf, 0, 0);
+                sprintf(outbuf, "Y: %04d Z: %04d", G, B);
+                LCD_WriteStringAtPos(outbuf, 1, 0);
+            }
             
             if(SWITCH2StateGet())
             {

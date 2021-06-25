@@ -210,7 +210,7 @@ void _UDP_ClientTasks()
                 if (!TCPIP_UDP_IsConnected(appData.clientSocket))
                 {
                     SYS_CONSOLE_MESSAGE("Client: Not connected\r\n");
-                    while(1);
+                    //while(1);
                     //appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
                     //TCPIP_UDP_Close(appData.clientSocket); 
                     break;
@@ -288,12 +288,36 @@ void _UDP_ClientTasks()
             if (UDP_bytes_received)
             {
                 TCPIP_UDP_ArrayGet(appData.clientSocket, (uint8_t*)UDP_Receive_Buffer, sizeof(UDP_Receive_Buffer)-1);
-                if(UDP_bytes_received > sizeof(UDP_Receive_Buffer)-1){
+                if(UDP_bytes_received > sizeof(UDP_Receive_Buffer)-1)
+                {
                     SYS_CONSOLE_PRINT("\r\nClient: Bytes discarded %u\n\r", UDP_bytes_received - sizeof(UDP_Receive_Buffer)-1);
                     TCPIP_UDP_Discard(appData.clientSocket);
                     UDP_bytes_received = sizeof(UDP_Receive_Buffer)-1;
                 }
                 UDP_Receive_Buffer[UDP_bytes_received] = '\0';    //append a null to display strings properly
+                
+                if(SWITCH0StateGet())
+                {
+                        SYS_CONSOLE_PRINT("Client Revieves %d data :\r\n", UDP_bytes_received);
+                        int i =0;
+                        SYS_CONSOLE_PRINT("index: %d\n\r",UDP_Receive_Buffer[i]);
+                        i++;
+                        SYS_CONSOLE_PRINT("X: ",UDP_Receive_Buffer[i]);
+                        for(;i<41;i++)
+                        {
+                            SYS_CONSOLE_PRINT("%d ",UDP_Receive_Buffer[i]);
+                        }
+                        SYS_CONSOLE_PRINT("\n\rY: ",UDP_Receive_Buffer[i]);
+                        for(;i<81;i++)
+                        {
+                            SYS_CONSOLE_PRINT("%d ",UDP_Receive_Buffer[i]);
+                        }
+                        SYS_CONSOLE_PRINT("\n\rZ: ",UDP_Receive_Buffer[i]);
+                        for(;i<121;i++)
+                        {
+                            SYS_CONSOLE_PRINT("%d ",UDP_Receive_Buffer[i]);
+                        }
+                }
                 SYS_CONSOLE_PRINT("\r\nClient: Client received %s\r\n", UDP_Receive_Buffer);
                 appData.clientState = UDP_TCPIP_WAITING_FOR_COMMAND;
                 //TCPIP_UDP_Close(appData.clientSocket); // XD: We want to keep socket opened
