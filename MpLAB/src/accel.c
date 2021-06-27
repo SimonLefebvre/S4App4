@@ -120,7 +120,7 @@ uint32_t indexSequence = 0;
 
 void env_aclData(int16_t* bufferx, int16_t* buffery, int16_t* bufferz, uint32_t size)
 {
-    // Index de sï¿½quence
+    // Index de séquence
     UDP_Send_Buffer[0] = indexSequence;
 
     int i = 0;
@@ -178,12 +178,13 @@ void accel_tasks()
         
         uint32_t buffer[121];
         memcpy(buffer,UDP_Receive_Buffer,sizeof(buffer));
-        RGBLED_SetValue((buffer[(count%40)+1]>>1)&0xFF,(buffer[(count%40)+41]>>1)&0xFF,(buffer[(count%40)+81]>>1)&0xFF);
+        RGBLED_SetValue((buffer[(count%40)+1]>>3)&0xFF,(buffer[(count%40)+41]>>3)&0xFF,(buffer[(count%40)+81]>>3)&0xFF);
+        
         
         if(count%40 == 39)
         {
             int16_t R, G, B ;
-            
+                        
             env_aclData(X, Y, Z, 40);
             
             R =  moyenne(X,40);//self test
