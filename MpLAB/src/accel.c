@@ -59,6 +59,8 @@ float fGRangeLSB;   // global variable used to pre-compute the value in g corres
 */
 uint8_t accel_buffer[accel_buf_length]; //the buffer for reading the acceleration values
 bool accel_data_ready; //a flag!
+extern uint32_t UDP_Buffer_Reception[121];
+extern uint32_t UDP_Reception_Counter;
 
 void ACL_Init()
 {
@@ -176,21 +178,23 @@ void accel_tasks()
         if(accel_buffer[4]&0x80)Z[count%40] = 0xF000 | (accel_buffer[4]<<4 | accel_buffer[5] >> 4);
         else Z[count%40] = (accel_buffer[4]<<4 | accel_buffer[5] >> 4);
         
-        uint32_t buffer[121];
-        memcpy(buffer,UDP_Receive_Buffer,sizeof(buffer));
-        RGBLED_SetValue((buffer[(count%40)+1]>>3)&0xFF,(buffer[(count%40)+41]>>3)&0xFF,(buffer[(count%40)+81]>>3)&0xFF);
-        
+        if(UDP_Reception_Counter < 39)
+        {
+            RGBLED_SetValue((UDP_Buffer_Reception[(UDP_Reception_Counter)+1]>>3)&0xFF,(UDP_Buffer_Reception[(UDP_Reception_Counter)+41]>>3)&0xFF,(UDP_Buffer_Reception[(UDP_Reception_Counter)+81]>>3)&0xFF);  
+        }
+        UDP_Reception_Counter ++;
         
         if(count%40 == 39)
         {
             int16_t R, G, B ;
-                        
-            env_aclData(X, Y, Z, 40);
+            
+            env_aclData(X, Y, Z, 40);//Sends UDP
+            
             
             R =  moyenne(X,40);//self test
             G =  moyenne(Y,40);//self test
             B =  moyenne(Z,40);//self test
-            //RGBLED_SetValue((abs(R)>>1)&0xFF,(abs(G)>>1)&0xFF,(abs(B)>>1)&0xFF); 
+            //RGBLED_SetValue((abs(R)>>1)&0xFF,(abs(G)>>1)&0xFF,(abs(B)>>1)&0xFF);
             
             if(SWITCH3StateGet())
             {

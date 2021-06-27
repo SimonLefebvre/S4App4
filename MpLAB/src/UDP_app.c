@@ -60,6 +60,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "app_commands.h"
 #define SERVER_PORT 8080
 int8_t _UDP_PumpDNS(const char * hostname, IPV4_ADDR *ipv4Addr);
+uint32_t UDP_Buffer_Reception[121] = {0};
+uint32_t UDP_Reception_Counter = 0;
 // *****************************************************************************
 // *****************************************************************************
 // Section: Global Data Definitions
@@ -286,6 +288,7 @@ void _UDP_ClientTasks()
             uint16_t UDP_bytes_received = TCPIP_UDP_GetIsReady(appData.clientSocket);
             if (UDP_bytes_received)
             {
+                //SYS_CONSOLE_PRINT("\n\rData Recieved\n\r");
                 TCPIP_UDP_ArrayGet(appData.clientSocket, (uint8_t*)UDP_Receive_Buffer, sizeof(UDP_Receive_Buffer)-1);
                 if(UDP_bytes_received > sizeof(UDP_Receive_Buffer)-1)
                 {
@@ -295,29 +298,31 @@ void _UDP_ClientTasks()
                 }
                 UDP_Receive_Buffer[UDP_bytes_received] = '\0';    //append a null to display strings properly
                 
+                
+                memcpy(UDP_Buffer_Reception,UDP_Receive_Buffer,sizeof(UDP_Buffer_Reception));    
+                UDP_Reception_Counter = 0;
                 if(SWITCH0StateGet())
                 {
-                    uint32_t buffer[121];
-                    memcpy(buffer,UDP_Receive_Buffer,sizeof(buffer));    
+                    
                     
                     SYS_CONSOLE_PRINT("Client Revieves %d data :\r\n", UDP_bytes_received);
                     int i =0;
-                    SYS_CONSOLE_PRINT("index: %d\n\r",buffer[i]);
+                    SYS_CONSOLE_PRINT("index: %d\n\r",UDP_Buffer_Reception[i]);
                     i++;
-                    SYS_CONSOLE_PRINT("X: ",buffer[i]);
+                    SYS_CONSOLE_PRINT("X: ",UDP_Buffer_Reception[i]);
                     for(;i<41;i++)
                     {
-                        SYS_CONSOLE_PRINT("%d ",buffer[i]);
+                        SYS_CONSOLE_PRINT("%d ",UDP_Buffer_Reception[i]);
                     }
-                    SYS_CONSOLE_PRINT("\n\rY: ",buffer[i]);
+                    SYS_CONSOLE_PRINT("\n\rY: ",UDP_Buffer_Reception[i]);
                     for(;i<81;i++)
                     {
-                        SYS_CONSOLE_PRINT("%d ",buffer[i]);
+                        SYS_CONSOLE_PRINT("%d ",UDP_Buffer_Reception[i]);
                     }
-                    SYS_CONSOLE_PRINT("\n\rZ: ",buffer[i]);
+                    SYS_CONSOLE_PRINT("\n\rZ: ",UDP_Buffer_Reception[i]);
                     for(;i<121;i++)
                     {
-                        SYS_CONSOLE_PRINT("%d ",buffer[i]);
+                        SYS_CONSOLE_PRINT("%d ",UDP_Buffer_Reception[i]);
                     }
                 }
                 
