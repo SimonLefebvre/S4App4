@@ -64,6 +64,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "lcd.h"
 #include "app_commands.h"
 #include "rgbled.h"
+#include "pmods.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -169,7 +170,6 @@ void MAIN_Initialize ( void )
 
 void MAIN_Tasks ( void )
 {
-
     /* Check the application's current state. */
     switch ( mainData.state )
     {
@@ -221,6 +221,8 @@ int main(void) {
     SYS_INT_Enable();
     SSD_WriteDigitsGrouped(0xFA9B,0x1);
     
+    PMODS_InitPin(1, 1, 0, 1, 0);
+    
     SYS_Tasks();
     
     SYS_CONSOLE_PRINT("\r\n*******************************************\r\n");
@@ -237,7 +239,9 @@ int main(void) {
     
     while (1) 
     {
+        PMODS_SetValue(1,1,0);
         SYS_Tasks();
+        PMODS_SetValue(1,1,1);
         MAIN_Tasks();
     };
 
